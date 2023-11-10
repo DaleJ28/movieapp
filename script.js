@@ -34,85 +34,77 @@ const Movie = (props) => {
   )
 }
 
-class MovieFinder extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      searchTerm: '',
-      results: [],
-      error: '',
-    };
+const {useState} = React;
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
+const MovieFinder = (props) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [results, setResults] = useState([]);
+  const [error, setError] = useState('');
+
+  const handleChange = (event) => {
+    setSearchTerm(event.target.value );
   }
 
-  handleChange(event) {
-    this.setState({ searchTerm: event.target.value });
-  }
-
-  handleSubmit(event) {
+  const handleSubmit = (event) => {
     event.preventDefault();
-    let { searchTerm } = this.state;
-    searchTerm = searchTerm.trim();
-    if (!searchTerm) {
+    const searchTermCopy = searchTerm.trim();
+    if (!searchTermCopy) {
       return;
     }
 
-    fetch(`https://www.omdbapi.com/?s=${searchTerm}&apikey=b7da8d63`)
+    fetch(`https://www.omdbapi.com/?s=${searchTermCopy}&apikey=b7da8d63`)
       .then(checkStatus)
       .then(json)
-      .then((data) => {
+      .then(data => {
         if (data.Response === 'False') {
           throw new Error(data.Error);
         }
 
         if (data.Response === 'True' && data.Search) {
-          this.setState({ results: data.Search, error: '' });
+          setResults(data.Search);
+          setError('');
         }
       })
-      .catch((error) => {
-        this.setState({ error: error.message });
+      .catch(error => {
+        setError(error.message);
         console.log(error);
       })
   }
 
-  render() {
-    const { searchTerm, results, error } = this.state;
-
-    return (
-      <div className="container">
-        <div className="row">
-          <div className="col-12">
-            <form onSubmit={this.handleSubmit} className="form-inline my-4">
-              <input
-                type="text"
-                className="form-control mr-sm-2"
-                placeholder="frozen"
-                value={searchTerm}
-                onChange={this.handleChange}
-              />
-              <button type="submit" className="btn btn-primary">Submit</button>
-            </form>
-            {(() => {
-              if (error) {
-                return error;
-              }
-              return results.map((movie) => {
-                return <Movie key={movie.imdbID} movie={movie} />;
-              })
-            })()}
-          </div>
+  return (
+    <div className="container">
+      <div className="row">
+        <div className="col-12">
+          <form onSubmit={handleSubmit} className="form-inline my-4">
+            <input
+              type="text"
+              className="form-control mr-sm-2"
+              placeholder="frozen"
+              value={searchTerm}
+              onChange={handleChange}
+            />
+            <button type="submit" className="btn btn-primary">Submit</button>
+          </form>
+          {(() => {
+            if (error) {
+              return error;
+            }
+            return results.map((movie) => {
+              return <Movie key={movie.imdbID} movie={movie} />;
+            })
+          })()}
         </div>
       </div>
-    )
-  }
-  // don't be lazy
+    </div>
+  )
 }
 
-const container = document.getElementById('root');
-const root = ReactDOM.createRoot(container);
-root.render(<MovieFinder />);
+ReactDOM.render(
+  <MovieFinder />,
+  document.getElementById('root')
+);
+
+
 
 
 // const checkStatus = (response) => {
@@ -205,7 +197,7 @@ root.render(<MovieFinder />);
 //               <input
 //                 type="text"
 //                 className="form-control mr-sm-2"
-//                 placeholder="frozen"
+//                 placeholder="Search"
 //                 value={searchTerm}
 //                 onChange={this.handleChange}
 //               />
@@ -230,3 +222,6 @@ root.render(<MovieFinder />);
 // const container = document.getElementById('root');
 // const root = ReactDOM.createRoot(container);
 // root.render(<MovieFinder />);
+
+
+
